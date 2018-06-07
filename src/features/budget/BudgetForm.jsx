@@ -15,7 +15,7 @@ const actions = {
 const type = [
   { key: "income", text: "Income", value: "income" },
   { key: "expense", text: "Expense", value: "expense" },
-  { key: "transfer", text: "Transfer", value: "transfer" }
+  { key: "savings", text: "Savings", value: "savings" }
 ];
 
 const validate = combineValidators({
@@ -28,6 +28,15 @@ const validate = combineValidators({
 export class BudgetForm extends Component {
   state = { activeIndex: -1 };
 
+  async componentDidMount() {
+    const { budget } = this.props;
+    if (budget.length === 0) {
+      this.setState({
+        activeIndex: 0
+      });
+    }
+  }
+
   handleClick = (e, titleProps) => {
     const { index } = titleProps;
     const { activeIndex } = this.state;
@@ -38,10 +47,10 @@ export class BudgetForm extends Component {
 
   onFormSubmit = values => {
     values.amount = Number(values.amount);
-    const newItem = {
+    const item = {
       ...values
     };
-    this.props.createBudgetItem(newItem);
+    this.props.createBudgetItem(item);
   };
 
   render() {
@@ -61,32 +70,34 @@ export class BudgetForm extends Component {
         </Accordion.Title>
         <Accordion.Content active={activeIndex === 0}>
           <Form onSubmit={this.props.handleSubmit(this.onFormSubmit)}>
-            <Form.Group widths="equal">
-              <Form.Field>
-                <label>Name</label>
-                <Field
-                  name="name"
-                  type="text"
-                  component={TextInput}
-                  placeholder="Car Payment"
-                />
-              </Form.Field>
-              <Form.Field>
-                <label>Amount</label>
-                <Field
-                  name="amount"
-                  type="number"
-                  step="0.01"
-                  component={TextInput}
-                  placeholder="300.00"
-                />
-              </Form.Field>
-            </Form.Group>
+            <Form.Field>
+              <label>Name</label>
+              <Field
+                name="name"
+                type="text"
+                component={TextInput}
+                placeholder="Car Payment"
+              />
+            </Form.Field>
+            <Form.Field>
+              <label>Amount</label>
+              <Field
+                prefix="$"
+                name="amount"
+                type="number"
+                step="0.01"
+                component={TextInput}
+                placeholder="300.00"
+              />
+            </Form.Field>
             <Form.Field>
               <label>Type</label>
               <Field
                 name="type"
                 type="text"
+                fluid
+                search
+                selection
                 component={SelectInput}
                 options={type}
                 placeholder="Select a type"
@@ -120,7 +131,10 @@ export class BudgetForm extends Component {
   }
 }
 
-export default connect(null, actions)(
+export default connect(
+  null,
+  actions
+)(
   reduxForm({ form: "budgetForm", enableReinitialize: true, validate })(
     BudgetForm
   )

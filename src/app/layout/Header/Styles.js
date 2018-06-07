@@ -1,5 +1,4 @@
 import { css } from "emotion";
-import { Dimensions } from "../../common/styles/variables";
 
 const Styles = {
   wrapper: css`
@@ -18,8 +17,6 @@ const Styles = {
     justify-content: space-between;
     max-width: 1440px;
     margin: 0 auto;
-    @media (min-width: ${Dimensions.desk}) {
-    }
   `,
 
   identity: css`

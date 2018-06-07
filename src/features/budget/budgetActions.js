@@ -1,75 +1,58 @@
 import { toastr } from "react-redux-toastr";
-import {
-  CREATE_BUDGET_ITEM,
-  DELETE_BUDGET_ITEM,
-  UPDATE_BUDGET_ITEM,
-  FETCH_BUDGET
-} from "./budgetConstants";
-import {
-  asyncActionStart,
-  asyncActionFinish,
-  asyncActionError
-} from "../async/asyncActions";
-import { fetchSampleData } from "../../app/data/mockAPI";
-
-export const fetchBudget = budget => {
-  return {
-    type: FETCH_BUDGET,
-    payload: budget
-  };
-};
 
 export const createBudgetItem = item => {
-  return async dispatch => {
+  return async (dispatch, getState, { getFirestore }) => {
+    const firestore = getFirestore();
+    const user = firestore.auth().currentUser;
     try {
-      dispatch({
-        type: CREATE_BUDGET_ITEM,
-        payload: {
-          item
-        }
-      });
-      toastr.success("Success", "Budget tiem has been added");
+      await firestore.add(
+        {
+          collection: "users",
+          doc: user.uid,
+          subcollections: [{ collection: "budget" }]
+        },
+        item
+      );
+      toastr.success("Success", "Item added to budget");
     } catch (error) {
       toastr.error("Oops", "Something went wrong");
     }
   };
 };
 
-export const updateBudgetItem = item => {
-  return async dispatch => {
+export const editBudgetItem = (item, id) => {
+  return async (dispatch, getState, { getFirestore }) => {
+    const firestore = getFirestore();
+    const user = firestore.auth().currentUser;
     try {
-      dispatch({
-        type: UPDATE_BUDGET_ITEM,
-        payload: {
-          item
-        }
-      });
-      toastr.success("Success", "Budget item has been updated");
+      await firestore.update(
+        {
+          collection: "users",
+          doc: user.uid,
+          subcollections: [{ collection: "budget", doc: id }]
+        },
+        item
+      );
+      toastr.success("Success", "Item updated");
     } catch (error) {
       toastr.error("Oops", "Something went wrong");
     }
   };
 };
 
-export const deleteBudgetItem = itemID => {
-  return {
-    type: DELETE_BUDGET_ITEM,
-    payload: {
-      itemID
-    }
-  };
-};
-
-export const loadBudget = () => {
-  return async dispatch => {
+export const deleteBudgetItem = id => {
+  return async (dispatch, getState, { getFirestore }) => {
+    const firestore = getFirestore();
+    const user = firestore.auth().currentUser;
     try {
-      dispatch(asyncActionStart());
-      let budget = await fetchSampleData();
-      dispatch(fetchBudget(budget));
-      dispatch(asyncActionFinish());
+      await firestore.delete({
+        collection: "users",
+        doc: user.uid,
+        subcollections: [{ collection: "budget", doc: id }]
+      });
+      toastr.success("Success", "Item removed");
     } catch (error) {
-      console.log(error);
-      dispatch(asyncActionError());
+      toastr.error("Oops", "Something went wrong");
     }
   };
 };

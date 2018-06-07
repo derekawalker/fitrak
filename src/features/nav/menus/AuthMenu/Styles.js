@@ -39,8 +39,27 @@ const Styles = {
     margin: 0.75em 0 0.75em 1em;
     border-radius: 3px;
     background: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
 
     &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  `,
+
+  dropdown: css`
+    color: #ccc;
+    display: flex;
+    align-items: center;
+    padding: 0 1em;
+
+    &:hover,
+    &:focus,
+    &:active {
+      color: #fff;
+    }
+
+    &.active {
+      color: #fff;
       background: rgba(255, 255, 255, 0.1);
     }
   `

@@ -1,22 +1,9 @@
 import React, { Component } from "react";
-import { connect } from "react-redux";
-import { deleteBudgetItem } from "../budgetActions";
 import { Table, Button } from "semantic-ui-react";
 import { formatMoney } from "accounting";
 import _ from "lodash";
-import { categories } from "../../../app/data/sampleData";
+import BudgetListItem from "../BudgetListItem";
 import Styles from "./Styles";
-
-const mapState = state => ({
-  budget: state.budget,
-  loading: state.async.loading
-});
-
-const actions = {
-  deleteBudgetItem
-};
-
-let tableFormat;
 
 export class BudgetList extends Component {
   state = {
@@ -25,14 +12,15 @@ export class BudgetList extends Component {
     filteredData: this.props.budget.filter(item => {
       return item.type === this.props.type;
     }),
+    sortedData: [],
     direction: null,
     isEditable: false
   };
 
   static getDerivedStateFromProps(nextProps, prevState) {
-    if (nextProps.budget.length !== prevState.data.length) {
+    if (nextProps.budget !== prevState.data) {
       return {
-        data: nextProps.budget,
+        budget: nextProps.budget,
         filteredData: nextProps.budget.filter(item => {
           return item.type === nextProps.type;
         })
@@ -42,74 +30,69 @@ export class BudgetList extends Component {
   }
 
   handleSort = clickedColumn => () => {
-    const { column, direction, data, filteredData } = this.state;
+    const { column, direction, filteredData, sortedData } = this.state;
 
     if (column !== clickedColumn) {
       this.setState({
         column: clickedColumn,
-        filteredData: _.sortBy(filteredData, [clickedColumn]),
+        sortedData: _.sortBy(filteredData, [clickedColumn]),
         direction: "ascending"
       });
+
+      console.log(column);
+      console.log(direction);
 
       return;
     }
 
     this.setState({
-      filteredData: filteredData.reverse(),
+      sortedData: sortedData.reverse(),
       direction: direction === "ascending" ? "descending" : "ascending"
     });
   };
 
-  handleTableEdit = () => {
+  handleEdit = () => {
     this.setState(prevState => ({
       isEditable: !prevState.isEditable
     }));
   };
 
   render() {
-    const { column, direction, filteredData, isEditable } = this.state;
-    const { color, name, type } = this.props;
+    const {
+      column,
+      direction,
+      filteredData,
+      isEditable,
+      sortedData
+    } = this.state;
+    const { color, name } = this.props;
+    let typeTotal;
+    if (filteredData.length > 0) {
+      typeTotal = filteredData
+        .map(item => item.amount)
+        .reduce((prev, next) => prev + next);
+    }
 
-    // let filteredBudget = budget.filter(item => {
-    //   return item.type === type;
-    // });
+    let rows;
 
-    // let sortedBudget = _.orderBy(
-    //   filteredBudget,
-    //   ["amount", "name"],
-    //   ["desc", "asc"]
-    // );
-
-    let tableFormat = filteredData.map((item, index) => (
-      <Table.Row key={index}>
-        <Table.Cell>{item.name}</Table.Cell>
-        <Table.Cell>
-          {_.find(categories, _.matchesProperty("value", item.category)).text}
-        </Table.Cell>
-        <Table.Cell>{formatMoney(item.amount)}</Table.Cell>
-      </Table.Row>
-    ));
-
-    if (isEditable) {
-      tableFormat = filteredData.map((item, index) => (
-        <Table.Row key={index}>
-          <Table.Cell>{item.name} Edit</Table.Cell>
-          <Table.Cell>
-            {_.find(categories, _.matchesProperty("value", item.category)).text}
-          </Table.Cell>
-          <Table.Cell>{formatMoney(item.amount)}</Table.Cell>
-        </Table.Row>
+    if (sortedData.length) {
+      rows = sortedData.map(budget => (
+        <BudgetListItem key={budget.id} item={budget} isEditable={isEditable} />
+      ));
+    } else {
+      rows = filteredData.map(budget => (
+        <BudgetListItem key={budget.id} item={budget} isEditable={isEditable} />
       ));
     }
 
     return (
       <div>
-        <h4 className={Styles.heading}>
-          {name}
-          <Button icon="setting" onClick={this.handleTableEdit} />
-        </h4>
+        <h2 className={Styles.heading}>
+          {name}: {formatMoney(typeTotal)}
+          <Button circular icon="setting" onClick={this.handleEdit} />
+        </h2>
 
-        <Table striped sortable fixed color={color}>
+        <Table striped sortable verticalAlign="top" color={color}>
           <Table.Header>
             <Table.Row>
               <Table.HeaderCell
@@ -127,16 +110,17 @@ export class BudgetList extends Component {
               <Table.HeaderCell
                 sorted={column === "amount" ? direction : null}
                 onClick={this.handleSort("amount")}
+                className={Styles.rightCell}
               >
                 Amount
               </Table.HeaderCell>
             </Table.Row>
           </Table.Header>
-          <Table.Body>{tableFormat}</Table.Body>
+          <Table.Body>{rows}</Table.Body>
         </Table>
       </div>
     );
   }
 }
 
-export default connect(mapState, actions)(BudgetList);
+export default BudgetList;

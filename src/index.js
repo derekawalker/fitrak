@@ -9,14 +9,12 @@ import App from "./app/layout/App";
 import registerServiceWorker from "./registerServiceWorker";
 import { configureStore } from "./app/store/configureStore";
 import ScrollToTop from "./app/common/util/ScrollToTop";
-// import { loadEvents } from "./features/event/eventActions";
 import "semantic-ui-css/semantic.min.css";
 import "react-redux-toastr/lib/css/react-redux-toastr.min.css";
 
 const store = configureStore();
-// store.dispatch(loadEvents());
 
-const rootElement = document.getElementById("root");
+const rootEl = document.getElementById("root");
 
 let render = () => {
   ReactDOM.render(
@@ -32,7 +30,7 @@ let render = () => {
         </ScrollToTop>
       </BrowserRouter>
     </Provider>,
-    rootElement
+    rootEl
   );
 };
 
@@ -42,6 +40,7 @@ if (module.hot) {
   });
 }
 
-render();
-
-registerServiceWorker();
+store.firebaseAuthIsReady.then(() => {
+  render();
+  registerServiceWorker();
+});
