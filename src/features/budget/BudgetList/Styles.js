@@ -11,6 +11,9 @@ const Styles = {
     @media (min-width: ${Dimensions.tab}) {
       text-align: right !important;
     }
+  `,
+  icon: css`
+    cursor: pointer;
   `
 };
 

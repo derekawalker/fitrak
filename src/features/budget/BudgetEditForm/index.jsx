@@ -105,8 +105,8 @@ export class BudgetEditForm extends Component {
                 name="amount"
                 type="number"
                 step="0.01"
-                iconLabel="$"
-                placeholder="300.00"
+                iconlabel="$"
+                placeholder="0.00"
                 defaultValue={budgetItem.amount}
                 onChange={this.handleChange}
               />

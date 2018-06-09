@@ -87,7 +87,7 @@ export class BudgetForm extends Component {
                 type="number"
                 step="0.01"
                 component={TextInput}
-                placeholder="300.00"
+                placeholder="0.00"
               />
             </Form.Field>
             <Form.Field>

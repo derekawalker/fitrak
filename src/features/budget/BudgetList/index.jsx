@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Table, Button } from "semantic-ui-react";
+import { Table, Icon } from "semantic-ui-react";
 import { formatMoney } from "accounting";
 import _ from "lodash";
 import BudgetListItem from "../BudgetListItem";
@@ -12,7 +12,12 @@ export class BudgetList extends Component {
     filteredData: this.props.budget.filter(item => {
       return item.type === this.props.type;
     }),
-    sortedData: [],
+    sortedData: _.sortBy(
+      this.props.budget.filter(item => {
+        return item.type === this.props.type;
+      }),
+      "amount"
+    ),
     direction: null,
     isEditable: false
   };
@@ -23,7 +28,13 @@ export class BudgetList extends Component {
         budget: nextProps.budget,
         filteredData: nextProps.budget.filter(item => {
           return item.type === nextProps.type;
-        })
+        }),
+        sortedData: _.sortBy(
+          nextProps.budget.filter(item => {
+            return item.type === nextProps.type;
+          }),
+          prevState.column
+        )
       };
     }
     return null;
@@ -39,9 +50,6 @@ export class BudgetList extends Component {
         direction: "ascending"
       });
 
-      console.log(column);
-      console.log(direction);
-
       return;
     }
 
@@ -49,6 +57,8 @@ export class BudgetList extends Component {
       sortedData: sortedData.reverse(),
       direction: direction === "ascending" ? "descending" : "ascending"
     });
+
+    return;
   };
 
   handleEdit = () => {
@@ -85,11 +95,21 @@ export class BudgetList extends Component {
       ));
     }
 
+    let icon = "setting";
+    if (this.state.isEditable) {
+      icon = "close";
+    }
+
     return (
       <div>
         <h2 className={Styles.heading}>
           {name}: {formatMoney(typeTotal)}
-          <Button circular icon="setting" onClick={this.handleEdit} />
+          <Icon
+            name={icon}
+            onClick={this.handleEdit}
+            className={Styles.icon}
+            color="grey"
+          />
         </h2>
 
         <Table striped sortable verticalAlign="top" color={color}>
